@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
+/* Dark mode berbasis class .dark pada <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   DESIGN TOKENS — megakomsel.com
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #0B4F8A;
+  --primary-600: #0F67B5;
+  --primary-700: #08406F;
+  --secondary: #18BFFF;
+  --surface: #F8FAFC;
+  --surface-dark: #0E1624;
+  --card: #FFFFFF;
+  --card-dark: #172335;
+  --text: #1A202C;
+  --text-dark: #E7EDF5;
+  --border: #E5E7EB;
+  --border-dark: #334155;
+  --success: #16A34A;
+  --danger: #DC2626;
+  --warning: #F59E0B;
+
+  --bg: var(--surface);
+  --bg-card: var(--card);
+  --ink: var(--text);
+  --line: var(--border);
 }
 
+.dark {
+  --bg: var(--surface-dark);
+  --bg-card: var(--card-dark);
+  --ink: var(--text-dark);
+  --line: var(--border-dark);
+}
+
+/* Ekspos token ke utility Tailwind: bg-primary, text-ink, border-line, dll. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: var(--primary);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-secondary: var(--secondary);
+  --color-surface: var(--bg);
+  --color-card: var(--bg-card);
+  --color-ink: var(--ink);
+  --color-line: var(--line);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--ink);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================================
+   ANIMASI & EFEK (sesuai referensi desain)
+   ============================================================ */
+
+/* Vignette gradient mask untuk gambar hero */
+.hero-vignette {
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* Marquee infinite */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .animate-marquee {
+    animation: none !important;
+  }
 }
