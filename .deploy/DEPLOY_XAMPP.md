@@ -60,14 +60,40 @@ C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd logs megakomsel-v3
 Catatan: pm2 TIDAK ada di PATH git-bash — pakai path penuh di atas,
 atau tambahkan `C:\Users\Administrator\AppData\Roaming\npm` ke PATH.
 
-## Auto-Start Setelah Reboot
+## Auto-Start Setelah Reboot / Mati Lampu
 
-1. Apache: service `Apache2.4` (set ke Automatic di services.msc).
-2. Node: scheduled task `pm2-megakomsel-v3` (ONLOGON Administrator) →
-   `cmd /c C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd resurrect`.
-   (pm2 process list sudah di-save: `pm2 save` → `C:\Users\Administrator\.pm2\dump.pm2`.)
-3. Kalau server reboot dan pm2 belum sempat start → website otomatis
-   fallback ke v1 (aman), lalu balik ke v3 saat user login.
+Urutan setelah boot (tanpa perlu login):
+1. Service `Apache2.4` (AUTO_START) nyala → situs langsung hidup di **v1 (fallback)**.
+2. Service `mysql` (AUTO_START) nyala → DB v1 siap.
+3. Node v3: nyala saat **Administrator LOGIN** (task `pm2-megakomsel-v3`, ONLOGON →
+   `pm2 resurrect`, process list sudah di-save di `C:\Users\Administrator\.pm2\dump.pm2`).
+   Antara boot dan login, situs melayani v1; begitu login, v3 mengambil alih
+   dalam hitungan detik (balancer `retry=5`).
+
+PENTING — kenapa tidak pakai Windows service / task ONSTART:
+Sudah dicoba tuntas (Agustus 2026) dan semuanya gagal di mesin ini:
+- Task ONSTART sebagai SYSTEM: cmd.exe DAN node.exe gagal init (0xC0000142) di sesi 0.
+- NSSM: gagal duplikasi filehandle stdin di sesi service.
+- WinSW: child node mati 0xC0000142.
+- Service langsung (sc create, node sebagai proses service): node JALAN, tapi SCM
+  MEMBUNUH prosesnya di detik ke-30 karena protocol dispatcher tidak dipanggil.
+- koffi (FFI untuk memanggil StartServiceCtrlDispatcherW): segfault di node 24.
+Kesimpulan: service Windows untuk node tidak bisa dipakai di mesin ini tanpa
+memperbaiki OS (sfc /scannow, DISM /RestoreHealth, Windows Update) atau
+mengganti node ke versi yang kompatibel. Auto-start Node WAJIB lewat mekanisme
+sesi login (ONLOGON), bukan session-0.
+
+Agar v3 nyala tanpa login sama sekali (full otomatis): aktifkan **Auto-Logon
+Windows** untuk Administrator (netplwiz, atau registry AutoAdminLogon) —
+Windows login sendiri saat boot, task ONLOGON langsung jalan.
+Konsekuensi: password Administrator tersimpan di registry (risiko keamanan —
+hanya disarankan untuk server internal).
+
+Catatan mati lampu: SQLite (`dev.db`) tahan crash; risiko korup sangat kecil.
+Disarankan backup berkala:
+```
+copy D:\xampp\htdocs\v3\dev.db D:\backup\dev.db-YYYYMMDD
+```
 
 ## Deploy Ulang / Update v3 — CUKUP `git pull`
 
