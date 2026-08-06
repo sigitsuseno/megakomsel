@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/site/Reveal";
-import Image from "next/image";
+import { AboutMedia, type AboutMediaData } from "@/components/site/AboutMedia";
 import { MILESTONES } from "@/lib/site";
 import { getSettingJson, SETTING_KEYS, type AboutSetting } from "@/lib/settings";
 
@@ -8,28 +8,37 @@ const ABOUT_DEFAULT: AboutSetting = {
   description:
     "Kami memberikan Solusi IT untuk Perusahaan dan Perseorangan dengan pengalaman lebih dari 15 tahun. Komitmen kami adalah menyediakan perangkat keras berkualitas, sistem jaringan tangguh, dan purna jual yang sigap.",
   milestones: MILESTONES,
+  mediaType: "image",
+  image: "https://picsum.photos/600/700?random=20",
+  svg: "",
+  anim: "waves",
 };
 
 export async function AboutSection() {
   const about = await getSettingJson<AboutSetting>(SETTING_KEYS.about, ABOUT_DEFAULT);
+  const media: AboutMediaData = {
+    mediaType: about.mediaType ?? "image",
+    image:
+      about.mediaType === "image"
+        ? about.image || "https://picsum.photos/600/700?random=20"
+        : about.image ?? "",
+    svg: about.svg ?? "",
+    anim: about.anim ?? "waves",
+  };
   return (
     <section id="tentang" className="py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <Reveal className="lg:col-span-5">
-            <div className="relative rounded-2xl overflow-hidden border border-line shadow-xl">
-              <Image
-                src="https://picsum.photos/600/700?random=20"
-                alt="Gedung & Tim Megakomsel"
-                width={600}
-                height={700}
-                className="w-full h-auto object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-6">
-                <span className="text-white font-medium text-sm">
-                  Gedung Operasional &amp; Workshop Megakomsel
-                </span>
-              </div>
+            <div className="relative aspect-[6/7] rounded-2xl overflow-hidden border border-line shadow-xl">
+              <AboutMedia media={media} />
+              {media.mediaType === "image" && (
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-6">
+                  <span className="text-white font-medium text-sm">
+                    Gedung Operasional &amp; Workshop Megakomsel
+                  </span>
+                </div>
+              )}
             </div>
           </Reveal>
 

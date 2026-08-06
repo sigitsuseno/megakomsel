@@ -9,6 +9,7 @@ import type { AboutSetting } from "@/lib/settings";
 import type { HeroSlide, HeroAnimPreset, MarketplaceItem } from "@/lib/site";
 import { HERO_ANIM_PRESETS } from "@/lib/site";
 import { HeroMediaVisual, ANIM_LABELS } from "@/components/site/HeroMedia";
+import { AboutMedia, type AboutMediaData } from "@/components/site/AboutMedia";
 import {
   saveAboutAction,
   saveHeroAction,
@@ -585,7 +586,15 @@ function AboutTab({ about }: { about: AboutSetting }) {
   const [headline, setHeadline] = useState(about.headline);
   const [description, setDescription] = useState(about.description);
   const [milestones, setMilestones] = useState<MilestoneRow[]>(about.milestones);
+  const [mediaType, setMediaType] = useState<AboutMediaData["mediaType"]>(
+    about.mediaType ?? "image"
+  );
+  const [image, setImage] = useState(about.image ?? "");
+  const [svg, setSvg] = useState(about.svg ?? "");
+  const [anim, setAnim] = useState<HeroAnimPreset>(about.anim ?? "waves");
   const [state, formAction, pending] = useActionState(saveAboutAction, undefined);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const updateMilestone = (i: number, patch: Partial<MilestoneRow>) =>
     setMilestones((prev) => prev.map((m, idx) => (idx === i ? { ...m, ...patch } : m)));
@@ -594,7 +603,25 @@ function AboutTab({ about }: { about: AboutSetting }) {
   const removeMilestone = (i: number) =>
     setMilestones((prev) => prev.filter((_, idx) => idx !== i));
 
-  const payload = JSON.stringify({ headline, description, milestones });
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/upload/about", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload gagal");
+      setImage(data.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload gagal");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const media: AboutMediaData = { mediaType, image, svg, anim };
+  const payload = JSON.stringify({ headline, description, milestones, mediaType, image, svg, anim });
 
   return (
     <Card className="p-6">
@@ -625,6 +652,120 @@ function AboutTab({ about }: { about: AboutSetting }) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Deskripsi perusahaan..."
           />
+        </div>
+
+        <div>
+          <Label>Tipe Media Gambar</Label>
+          <div className="flex gap-2 flex-wrap">
+            {MEDIA_TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setMediaType(opt.value)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors",
+                  mediaType === opt.value
+                    ? "bg-primary text-white"
+                    : "border border-line bg-card text-ink/70 hover:text-ink"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {mediaType === "image" && (
+          <div>
+            <Label htmlFor="about-image">Gambar (upload atau URL)</Label>
+            <div className="flex items-start gap-3">
+              <div className="w-24 h-24 shrink-0 rounded-xl border border-line bg-surface overflow-hidden">
+                {image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] text-ink/40 text-center px-1">
+                    Belum ada
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <Input
+                  id="about-image"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="Tempel URL gambar atau upload"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-medium border border-line bg-card text-ink hover:border-secondary transition-colors cursor-pointer">
+                    {uploading ? "Mengunggah..." : "Upload File"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) uploadImage(file);
+                      }}
+                    />
+                  </label>
+                  {image && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="px-4 py-1.5 text-xs"
+                      onClick={() => setImage("")}
+                    >
+                      Hapus Gambar
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {mediaType === "svg" && (
+          <div className="space-y-2">
+            <Label htmlFor="about-svg">Kode SVG</Label>
+            <Textarea
+              id="about-svg"
+              rows={6}
+              className="font-mono text-xs"
+              value={svg}
+              onChange={(e) => setSvg(e.target.value)}
+              placeholder={'<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">...</svg>'}
+            />
+            <p className="text-xs text-ink/50">
+              Tempel kode SVG. Script dan event handler otomatis dibersihkan saat ditampilkan.
+            </p>
+          </div>
+        )}
+
+        {mediaType === "anim" && (
+          <div>
+            <Label htmlFor="about-anim">Gaya Animasi</Label>
+            <Select
+              id="about-anim"
+              value={anim}
+              onChange={(e) => setAnim(e.target.value as HeroAnimPreset)}
+            >
+              {ANIM_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
+
+        <div>
+          <Label>Pratinjau</Label>
+          <div className="relative h-44 rounded-xl overflow-hidden border border-line bg-surface">
+            <AboutMedia media={media} />
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -663,6 +804,12 @@ function AboutTab({ about }: { about: AboutSetting }) {
             </div>
           ))}
         </div>
+
+        {uploadError && (
+          <p role="alert" className="p-3 rounded-xl text-sm font-medium bg-danger/10 text-danger">
+            {uploadError}
+          </p>
+        )}
 
         <StateAlert state={state} />
 

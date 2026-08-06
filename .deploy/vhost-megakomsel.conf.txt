@@ -1,0 +1,40 @@
+# ============================================================
+#  MEGAKOMSEL — Apache vhost untuk XAMPP (Windows Server)
+#  Letak: C:\xampp\apache\conf\extra\httpd-vhosts.conf
+#  (tambahkan blok ini DI BAWAH blok vhost default "localhost")
+# ============================================================
+
+<VirtualHost *:80>
+    ServerName megakomsel.com
+    ServerAlias www.megakomsel.com
+
+    # --- Reverse proxy ke Next.js (Node.js di port 3000) ---
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+
+    # --- Timeout lebih pendek biar fallback cepat (opsional) ---
+    ProxyTimeout 5
+
+    # --- FALLBACK: kalau Node.js mati, tampilkan maintenance page ---
+    # maintenance.html harus ada di C:\xampp\htdocs\maintenance.html
+    ErrorDocument 502 /maintenance.html
+    ErrorDocument 503 /maintenance.html
+    ErrorDocument 504 /maintenance.html
+
+    # --- Log ---
+    ErrorLog "logs/megakomsel-error.log"
+    CustomLog "logs/megakomsel-access.log" common
+</VirtualHost>
+
+# ============================================================
+#  WAJIB sebelum dipakai:
+#  1. Enable modul proxy di C:\xampp\apache\conf\httpd.conf:
+#       LoadModule proxy_module modules/mod_proxy.so
+#       LoadModule proxy_http_module modules/mod_proxy_http.so
+#     (hapus tanda # di depan baris tersebut kalau masih dikomentari)
+#  2. Tambahkan ke C:\Windows\System32\drivers\etc\hosts:
+#       127.0.0.1 megakomsel.com
+#       ::1       megakomsel.com
+#  3. Restart Apache (XAMPP Control → Apache → Stop → Start)
+# ============================================================

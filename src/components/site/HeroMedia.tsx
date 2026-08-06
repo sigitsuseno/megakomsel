@@ -145,6 +145,11 @@ const PRESETS: Record<HeroAnimPreset, () => React.ReactNode> = {
   grid: GridVisual,
 };
 
+export function HeroAnimVisual({ anim }: { anim: HeroAnimPreset }) {
+  const Preset = PRESETS[anim] ?? PRESETS.waves;
+  return <Preset />;
+}
+
 function EmptyMedia() {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-surface dark:bg-slate-950">
@@ -189,6 +194,5 @@ export function HeroMediaVisual({
     );
   }
 
-  const Preset = PRESETS[slide.anim] ?? PRESETS.waves;
-  return <Preset />;
+  return <HeroAnimVisual anim={slide.anim} />;
 }

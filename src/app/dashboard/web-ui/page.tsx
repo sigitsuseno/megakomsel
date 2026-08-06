@@ -16,6 +16,10 @@ const ABOUT_DEFAULT: AboutSetting = {
   description:
     "Kami memberikan Solusi IT untuk Perusahaan dan Perseorangan dengan pengalaman lebih dari 15 tahun. Komitmen kami adalah menyediakan perangkat keras berkualitas, sistem jaringan tangguh, dan purna jual yang sigap.",
   milestones: MILESTONES,
+  mediaType: "image",
+  image: "https://picsum.photos/600/700?random=20",
+  svg: "",
+  anim: "waves",
 };
 
 export default async function WebUiPage() {

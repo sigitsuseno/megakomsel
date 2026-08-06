@@ -76,6 +76,10 @@ export const aboutSchema = z.object({
       })
     )
     .default([]),
+  mediaType: z.enum(["image", "svg", "anim"]).default("image"),
+  image: z.string().trim().max(2000).optional().or(z.literal("")),
+  svg: z.string().trim().max(30000).optional().or(z.literal("")),
+  anim: z.enum(HERO_ANIM_PRESETS).default("waves"),
 });
 
 export const heroSlideSchema = z.object({

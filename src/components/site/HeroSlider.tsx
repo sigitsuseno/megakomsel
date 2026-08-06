@@ -91,8 +91,8 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
 
           {/* Kanan: media slider (gambar / svg / animasi) + vignette */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-2xl overflow-hidden bg-card p-2 shadow-xl">
-              <div className="hero-vignette relative h-[320px] sm:h-[420px] rounded-xl overflow-hidden">
+            <div className="relative">
+              <div className="relative h-[320px] sm:h-[420px] overflow-hidden">
                 {slides.map((slide, i) => (
                   <div
                     key={slide.id}

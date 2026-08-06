@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { HeroAnimPreset } from "@/lib/site";
 
 export const SETTING_KEYS = {
   marketplaces: "marketplaces",
@@ -10,6 +11,14 @@ export type AboutSetting = {
   headline: string;
   description: string;
   milestones: { year: string; text: string }[];
+  /** Jenis visual di kolom gambar section Tentang Kami. */
+  mediaType?: "image" | "svg" | "anim";
+  /** URL gambar (upload lokal `/uploads/...` atau URL eksternal). Dipakai saat mediaType = "image". */
+  image?: string;
+  /** Kode SVG inline (script & event handler dibersihkan saat render). Dipakai saat mediaType = "svg". */
+  svg?: string;
+  /** Preset animasi bawaan. Dipakai saat mediaType = "anim". */
+  anim?: HeroAnimPreset;
 };
 
 /**
