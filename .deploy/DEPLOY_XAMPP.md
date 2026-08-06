@@ -1,112 +1,108 @@
-# DEPLOY MEGAKOMSEL ke XAMPP (Windows Server)
+# DEPLOY v3 (megakomsel/Next.js) ke XAMPP — imatechcom.com
 
-## Arsitektur
+> Status: SUDAH TERPASANG (Agustus 2026). Dokumen ini adalah catatan kondisi
+> final + panduan operasional, bukan rencana.
 
-```
-Browser ──► Apache (XAMPP) :80 ──► Node.js (Next.js) :3000
-              │  │
-              │  └── Node mati? ──► maintenance.html (fallback otomatis)
-              └── megakomsel.com (vhost reverse proxy)
-```
-
-Karena app ini full-stack (SSR, Server Actions, API routes), Node.js WAJIB jalan.
-Apache cuma jadi pintu masuk + penyedia fallback.
-
----
-
-## PRASYARAT DI SERVER
-
-1. XAMPP sudah terinstall (Apache aktif di port 80)
-2. Node.js 20+ terinstall (cek: `node -v`)
-3. PM2 terinstall (opsional tapi disarankan): `npm i -g pm2`
-4. Project megakomsel sudah dicopy ke server
-   (folder lengkap termasuk .next hasil build, atau build ulang di server)
-
----
-
-## LANGKAH 1 — Siapkan .env di server
-
-Buat file `.env` di folder project (copy dari `.env.example`):
+## Arsitektur Final
 
 ```
-DATABASE_URL="file:./dev.db"
-AUTH_SECRET="<generate random 64+ char>"
+Browser ──► https://imatechcom.com (Apache :443, SSL)
+              │
+              ▼
+        balancer://v3cluster  (mod_proxy_balancer, lbmethod=byrequests)
+        ├── Member 1 (PRIMARY): http://127.0.0.1:3100   → v3 Next.js (Node, pm2)
+        └── Member 2 (HOT STANDBY, status=+H): https://127.0.0.1:8080
+                                                      → v1 Laravel (fallback)
 ```
 
-Generate secret:
+- Node hidup  → yang dilayani v3 (megakomsel)
+- Node mati   → otomatis v1 (Laravel imatechcom), tanpa downtime
+- Node hidup lagi → balik ke v3 dalam ~5 detik (member `retry=5`)
+- http:// → redirect permanent ke https://
+
+## Komponen
+
+| Bagian | Lokasi |
+|--------|--------|
+| Project v3 | `D:\xampp\htdocs\v3` (Next.js 16, Prisma+SQLite `dev.db`) |
+| Project v1 (fallback) | `D:\xampp\htdocs\v1` (Laravel 10) — TIDAK diubah sama sekali |
+| PM2 app | `megakomsel-v3` — `D:\xampp\htdocs\v3\.deploy\ecosystem.config.cjs` |
+| PM2 log | `D:\xampp\htdocs\v3\.deploy\logs\{out,error}.log` |
+| Vhost imatechcom | `D:\xampp\apache\conf\extra\httpd-vhosts.conf` |
+| Vhost fallback :8080 | file yang sama (blok `127.0.0.1:8080`) |
+| SSL imatechcom | `D:\xampp\apache\conf\ssl_imatech\ssl.cert` / `ssl.key` |
+
+## Port yang Dipakai
+
+- `3100` — v3 Next.js (PM2). Sengaja BUKAN 3000: vhost `anxiety.imatechcom.com`
+  sudah mengarah ke `localhost:3000`.
+- `8080` — internal fallback Laravel v1, listen hanya di `127.0.0.1`
+  (baris `Listen 127.0.0.1:8080` di httpd-vhosts.conf).
+
+## Operasional Harian
+
+```bash
+# Cek status
+C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd list
+
+# Restart v3
+C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd restart megakomsel-v3
+
+# Stop v3 (website otomatis pindah ke v1)
+C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd stop megakomsel-v3
+
+# Lihat log
+C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd logs megakomsel-v3
 ```
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+
+Catatan: pm2 TIDAK ada di PATH git-bash — pakai path penuh di atas,
+atau tambahkan `C:\Users\Administrator\AppData\Roaming\npm` ke PATH.
+
+## Auto-Start Setelah Reboot
+
+1. Apache: service `Apache2.4` (set ke Automatic di services.msc).
+2. Node: scheduled task `pm2-megakomsel-v3` (ONLOGON Administrator) →
+   `cmd /c C:\Users\Administrator\AppData\Roaming\npm\pm2.cmd resurrect`.
+   (pm2 process list sudah di-save: `pm2 save` → `C:\Users\Administrator\.pm2\dump.pm2`.)
+3. Kalau server reboot dan pm2 belum sempat start → website otomatis
+   fallback ke v1 (aman), lalu balik ke v3 saat user login.
+
+## Deploy Ulang / Update v3
+
+```bash
+cd /d/xampp/htdocs/v3
+npm run build          # build baru
+pm2 restart megakomsel-v3
 ```
 
-Catatan: dev.db (SQLite) ikut dicopy kalau mau data lama; kalau mau fresh,
-hapus dev.db lalu jalankan `npm run db:migrate` + `npm run seed` di server.
+Perubahan kode tidak butuh sentuh Apache sama sekali (proxy sudah balancer).
 
----
+## Migrasi DB (kalau perlu)
 
-## LANGKAH 2 — Install dependencies & build (kalau belum di server)
-
-```
-cd C:\xampp\htdocs\megakomsel   (atau folder project di server)
-npm install
-npm run build
+```bash
+cd /d/xampp/htdocs/v3
+npx prisma generate
+npx prisma migrate deploy   # pakai deploy, bukan dev, di produksi
+npm run seed                # kalau butuh data awal
 ```
 
----
+## Verifikasi Cepat
 
-## LANGKAH 3 — Jalankan Node.js (pakai PM2)
+```bash
+# Harusnya: <title>Megakomsel — ...</title> (v3)
+curl -sk --resolve imatechcom.com:443:127.0.0.1 https://imatechcom.com/ | grep -o '<title>[^<]*</title>'
 
-```
-npm i -g pm2
-pm2 start "npm run start" --name megakomsel
-pm2 save
-pm2 startup   # ikuti instruksi yang muncul, biar auto-start saat reboot
-```
-
-Tes: buka `http://127.0.0.1:3000` — harus muncul landing page.
-
-Kalau tanpa PM2 (manual):
-```
-npm run start
+# Stop node, ulangi: harusnya <title>Imatechcom</title> (v1)
+pm2 stop megakomsel-v3
 ```
 
----
+## Trouble
 
-## LANGKAH 4 — Konfigurasi Apache (XAMPP)
-
-1. Buka `C:\xampp\apache\conf\httpd.conf`
-2. Pastikan modul proxy aktif (hapus tanda # kalau masih ada):
-   ```
-   LoadModule proxy_module modules/mod_proxy.so
-   LoadModule proxy_http_module modules/mod_proxy_http.so
-   ```
-3. Buka `C:\xampp\apache\conf\extra\httpd-vhosts.conf`
-4. Tambahkan isi file `vhost-megakomsel.conf.txt` (di folder .deploy)
-   DI BAWAH blok vhost localhost default.
-5. Copy `maintenance.html` ke `C:\xampp\htdocs\maintenance.html`
-6. Edit `C:\Windows\System32\drivers\etc\hosts` (butuh admin):
-   ```
-   127.0.0.1 megakomsel.com
-   ```
-7. Restart Apache (XAMPP Control Panel → Apache → Stop → Start)
-
----
-
-## LANGKAH 5 — Verifikasi
-
-| Tes | Cara | Hasil |
-|-----|------|-------|
-| App normal | buka http://megakomsel.com | Landing page |
-| Fallback | stop PM2 (`pm2 stop megakomsel`), buka lagi | maintenance.html |
-| Node nyala lagi | `pm2 start megakomsel` | App normal lagi |
-
----
-
-## TROUBLESHOOTING
-
-- **502 Bad Gateway** tapi Node hidup → cek port: `netstat -ano | findstr :3000`,
-  pastikan ProxyPass arahnya 127.0.0.1:3000.
-- **Apache nggak mau start setelah edit vhost** → cek syntax:
-  `C:\xampp\apache\bin\httpd.exe -t`
-- **Fallback nggak muncul** → pastikan maintenance.html ada di htdocs
-  dan ErrorDocument pakai path `/maintenance.html` (slash depan).
-- **App error database** → cek dev.db ada di folder project & .env benar.
+- **Apache error `BalancerMember unknown Worker parameter`** → jangan pakai
+  `hot_standby=On` di Apache 2.4.56; pakai `status=+H`.
+- **Fallback tidak jalan** → cek `https://127.0.0.1:8080/` bisa diakses
+  (`curl -sk`), cek log `D:\xampp\apache\logs\imatechcom-error.log`.
+- **502 terus** → port 3100 mati dan 8080 ikut mati (Apache down?). Cek
+  `netstat -ano | findstr :3100` dan service Apache2.4.
+- **Perlu `mod_lbmethod_byrequests`**: sudah di-uncomment di httpd.conf
+  (baris `LoadModule lbmethod_byrequests_module ...`). Jangan dinonaktifkan.
