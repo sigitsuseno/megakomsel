@@ -1,6 +1,8 @@
-import { COMPANY } from "@/lib/site";
+import { COMPANY, type CompanySetting } from "@/lib/site";
+import { getSettingJson, SETTING_KEYS } from "@/lib/settings";
 
-export function CtaBand() {
+export async function CtaBand() {
+  const company = await getSettingJson<CompanySetting>(SETTING_KEYS.company, COMPANY);
   return (
     <section className="py-12 bg-primary text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
@@ -13,7 +15,7 @@ export function CtaBand() {
           </p>
         </div>
         <a
-          href={COMPANY.wa1Url}
+          href={company.wa1Url}
           target="_blank"
           rel="noopener"
           className="whitespace-nowrap px-8 py-3.5 rounded-xl bg-secondary text-slate-900 font-bold hover:bg-white transition-all shadow-lg"

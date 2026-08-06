@@ -5,6 +5,7 @@ export const SETTING_KEYS = {
   marketplaces: "marketplaces",
   about: "about",
   hero: "hero",
+  company: "company",
 } as const;
 
 export type AboutSetting = {

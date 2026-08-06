@@ -1,5 +1,32 @@
-// Data perusahaan terpusat — ganti sekali di sini, terpakai di seluruh situs.
-export const COMPANY = {
+export type SocialLink = {
+  id: string;
+  label: string;
+  url: string;
+};
+
+export type CompanySetting = {
+  name: string;
+  brand: string;
+  tagline: string;
+  email: string;
+  city: string;
+  wa1: string;
+  wa1Url: string;
+  wa2: string;
+  wa2Url: string;
+  /** URL logo (upload lokal `/uploads/...` atau URL eksternal). Kosong = logo huruf "M". */
+  logo: string;
+  /** URL favicon (upload lokal `/uploads/...` atau URL eksternal). Kosong = ikon bawaan. */
+  favicon: string;
+  address: string;
+  /** URL embed Google Maps (dari menu Share → Embed a map). */
+  googleMap: string;
+  hours: { label: string; value: string }[];
+  social: SocialLink[];
+};
+
+// Data perusahaan default — bisa diubah lewat Dashboard → WEB UI → Setting.
+export const COMPANY: CompanySetting = {
   name: "CV Megakomsel IMATECH",
   brand: "MEGAKOMSEL",
   tagline: "IT Solutions",
@@ -9,11 +36,16 @@ export const COMPANY = {
   wa1Url: "https://wa.me/6285640111213",
   wa2: "+62 822-2009-9587",
   wa2Url: "https://wa.me/6282220099587",
+  logo: "",
+  favicon: "",
+  address: "",
+  googleMap: "",
   hours: [
     { label: "Senin - Jumat", value: "08.00 - 22.00 WIB" },
     { label: "Sabtu", value: "09.00 - 22.00 WIB" },
     { label: "Minggu", value: "By Call / Janji Temu" },
   ],
+  social: [],
 };
 
 export type MarketplaceItem = {

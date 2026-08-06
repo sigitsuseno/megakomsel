@@ -97,3 +97,40 @@ export const heroSlideSchema = z.object({
 export const heroSchema = z
   .array(heroSlideSchema)
   .min(1, "Minimal satu slide hero");
+
+export const companySchema = z.object({
+  name: z.string().min(1, "Nama perusahaan wajib diisi").trim(),
+  brand: z.string().min(1, "Brand wajib diisi").trim(),
+  tagline: z.string().trim().max(200).optional().or(z.literal("")),
+  email: z.string().trim().max(200).optional().or(z.literal("")),
+  city: z.string().trim().max(200).optional().or(z.literal("")),
+  wa1: z.string().trim().max(50).optional().or(z.literal("")),
+  wa1Url: z.string().trim().max(500).optional().or(z.literal("")),
+  wa2: z.string().trim().max(50).optional().or(z.literal("")),
+  wa2Url: z.string().trim().max(500).optional().or(z.literal("")),
+  logo: z.string().trim().max(2000).optional().or(z.literal("")),
+  favicon: z.string().trim().max(2000).optional().or(z.literal("")),
+  address: z.string().trim().max(500).optional().or(z.literal("")),
+  googleMap: z.string().trim().max(3000).optional().or(z.literal("")),
+  hours: z
+    .array(
+      z.object({
+        label: z.string().min(1).trim(),
+        value: z.string().min(1).trim(),
+      })
+    )
+    .default([]),
+  social: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(64),
+        label: z.string().min(1, "Nama sosmed wajib diisi").trim().max(50),
+        url: z
+          .string()
+          .min(1, "URL sosmed wajib diisi")
+          .trim()
+          .refine((v) => /^https?:\/\/.+/.test(v), "URL sosmed harus dimulai dengan http(s)://"),
+      })
+    )
+    .default([]),
+});

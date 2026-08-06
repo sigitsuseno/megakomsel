@@ -3,10 +3,16 @@
 import { useActionState } from "react";
 import { submitContactAction } from "@/actions/contact";
 import { Label, Input, Textarea, Select, Button } from "@/components/ui";
-import { SERVICE_OPTIONS } from "@/lib/site";
+import { COMPANY, SERVICE_OPTIONS, type CompanySetting } from "@/lib/site";
 
-export function ContactSection() {
+type ContactCompany = Pick<CompanySetting, "googleMap" | "address">;
+
+const DEFAULT_MAP_EMBED =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.226087547517!2d110.413!3d-6.99!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTknMjQuMCJTIDExMMKwMjQnNDg!5e0!3m2!1sid!2sid!4v1620000000000!5m2!1sid!2sid";
+
+export function ContactSection({ company = COMPANY }: { company?: ContactCompany }) {
   const [state, formAction, pending] = useActionState(submitContactAction, undefined);
+  const mapSrc = company.googleMap || DEFAULT_MAP_EMBED;
 
   return (
     <section id="kontak" className="py-16 lg:py-24">
@@ -24,14 +30,19 @@ export function ContactSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-line shadow-md h-full min-h-[380px]">
+          <div className="lg:col-span-5 rounded-2xl overflow-hidden border border-line shadow-md h-full min-h-[380px] flex flex-col">
             <iframe
               title="Peta Lokasi Megakomsel"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.226087547517!2d110.413!3d-6.99!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTknMjQuMCJTIDExMMKwMjQnNDg!5e0!3m2!1sid!2sid!4v1620000000000!5m2!1sid!2sid"
-              className="w-full h-full min-h-[380px] border-0"
+              src={mapSrc}
+              className="w-full flex-grow min-h-[340px] border-0"
               allowFullScreen
               loading="lazy"
             />
+            {company.address && (
+              <p className="px-4 py-3 text-xs text-ink/75 border-t border-line bg-card">
+                <span className="font-bold text-ink">Alamat:</span> {company.address}
+              </p>
+            )}
           </div>
 
           <div className="lg:col-span-7 p-8 rounded-2xl border border-line bg-card shadow-lg">

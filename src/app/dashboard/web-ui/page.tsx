@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import {
+  COMPANY,
   HERO_SLIDES,
   MARKETPLACES,
   MILESTONES,
+  type CompanySetting,
   type HeroSlide,
   type MarketplaceItem,
 } from "@/lib/site";
@@ -23,10 +25,11 @@ const ABOUT_DEFAULT: AboutSetting = {
 };
 
 export default async function WebUiPage() {
-  const [marketplaces, about, hero, messages] = await Promise.all([
+  const [marketplaces, about, hero, company, messages] = await Promise.all([
     getSettingJson<MarketplaceItem[]>(SETTING_KEYS.marketplaces, MARKETPLACES),
     getSettingJson<AboutSetting>(SETTING_KEYS.about, ABOUT_DEFAULT),
     getSettingJson<HeroSlide[]>(SETTING_KEYS.hero, HERO_SLIDES),
+    getSettingJson<CompanySetting>(SETTING_KEYS.company, COMPANY),
     prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
 
@@ -43,6 +46,7 @@ export default async function WebUiPage() {
         marketplaces={marketplaces}
         about={about}
         hero={hero}
+        company={company}
         messages={messages}
       />
     </div>

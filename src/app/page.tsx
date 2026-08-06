@@ -8,8 +8,11 @@ import { Counters } from "@/components/site/Counters";
 import { ContactSection } from "@/components/site/ContactSection";
 import { Footer } from "@/components/site/Footer";
 import { BackToTop } from "@/components/site/BackToTop";
+import { COMPANY, type CompanySetting } from "@/lib/site";
+import { getSettingJson, SETTING_KEYS } from "@/lib/settings";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const company = await getSettingJson<CompanySetting>(SETTING_KEYS.company, COMPANY);
   return (
     <>
       <Header />
@@ -20,7 +23,7 @@ export default function HomePage() {
         <CtaBand />
         <AboutSection />
         <Counters />
-        <ContactSection />
+        <ContactSection company={company} />
       </main>
       <Footer />
       <BackToTop />

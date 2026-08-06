@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { setSettingJson } from "@/lib/settings";
-import { aboutSchema, heroSchema, marketplacesSchema } from "@/lib/validations";
+import { aboutSchema, companySchema, heroSchema, marketplacesSchema } from "@/lib/validations";
 
 export type SiteSettingState =
   | { error?: string; success?: string }
@@ -79,4 +79,28 @@ export async function saveHeroAction(
   revalidatePath("/");
   revalidatePath("/dashboard/web-ui");
   return { success: "Hero Section berhasil disimpan & tampil di homepage." };
+}
+
+export async function saveCompanyAction(
+  _prev: SiteSettingState,
+  formData: FormData
+): Promise<SiteSettingState> {
+  await requireAdmin();
+
+  let raw: unknown;
+  try {
+    raw = JSON.parse(String(formData.get("company") || "{}"));
+  } catch {
+    return { error: "Data Setting tidak valid." };
+  }
+
+  const parsed = companySchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Data Setting tidak valid." };
+  }
+
+  await setSettingJson("company", parsed.data);
+  revalidatePath("/");
+  revalidatePath("/dashboard/web-ui");
+  return { success: "Setting berhasil disimpan & tampil di seluruh situs." };
 }

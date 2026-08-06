@@ -6,8 +6,11 @@ import Image from "next/image";
 import { useCart } from "@/components/store/CartProvider";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { cn } from "@/lib/utils";
+import type { CompanySetting } from "@/lib/site";
 
 type SessionUser = { id: string; name: string; email: string; role: string } | null;
+
+type HeaderCompany = Pick<CompanySetting, "wa1Url" | "brand" | "tagline" | "logo">;
 
 const PREVIEW_DATA: Record<string, { title: string; desc: string; img: string }> = {
   about: {
@@ -44,7 +47,7 @@ export function HeaderClient({
   company,
 }: {
   session: SessionUser;
-  company: { wa1Url: string; brand: string; tagline: string };
+  company: HeaderCompany;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [offcanvasOpen, setOffcanvasOpen] = useState(false);
@@ -103,9 +106,18 @@ export function HeaderClient({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group" aria-label="Megakomsel Beranda">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:bg-primary-600 transition-colors">
-              M
-            </div>
+            {company.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={company.logo}
+                alt={`Logo ${company.brand}`}
+                className="w-10 h-10 rounded-xl object-contain bg-card border border-line shadow-md"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:bg-primary-600 transition-colors">
+                M
+              </div>
+            )}
             <div className="flex flex-col">
               <span className="font-heading font-bold text-2xl tracking-tight text-ink">
                 {company.brand}
