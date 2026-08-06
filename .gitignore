@@ -48,3 +48,6 @@ next-env.d.ts
 
 # file upload lokal
 /public/uploads
+
+# log pm2 (jangan pernah di-track)
+/.deploy/logs/
