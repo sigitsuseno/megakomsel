@@ -1,5 +1,5 @@
 import { Header } from "@/components/site/Header";
-import { HeroSlider } from "@/components/site/HeroSlider";
+import { HeroSection } from "@/components/site/HeroSection";
 import { MarketplaceMarquee } from "@/components/site/MarketplaceMarquee";
 import { ServicesGrid } from "@/components/site/ServicesGrid";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -14,7 +14,7 @@ export default function HomePage() {
     <>
       <Header />
       <main id="main-content" className="flex-grow">
-        <HeroSlider />
+        <HeroSection />
         <MarketplaceMarquee />
         <ServicesGrid />
         <CtaBand />

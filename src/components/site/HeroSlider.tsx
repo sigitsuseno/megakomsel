@@ -1,54 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { HeroMediaVisual } from "@/components/site/HeroMedia";
+import type { HeroSlide } from "@/lib/site";
 
-const SLIDES = [
-  {
-    title: "Transformasi Digital Bisnis Anda",
-    desc: "Tingkatkan efisiensi & keamanan infrastruktur IT perusahaan Anda bersama layanan teknisi ahli profesional dari Megakomsel.",
-    cta: { label: "Konsultasi Gratis", href: "#kontak" },
-    img: "https://picsum.photos/800/600?random=10",
-  },
-  {
-    title: "Promo CCTV Hingga 30%",
-    desc: "Sistem pengawasan keamanan IP CCTV terintegrasi 24/7, dapat dipantau langsung kapan saja melalui perangkat smartphone Anda.",
-    cta: { label: "Lihat Paket CCTV", href: "#layanan" },
-    img: "https://picsum.photos/800/600?random=11",
-  },
-  {
-    title: "Layanan Pengadaan Peralatan IT",
-    desc: "Mitra pengadaan resmi PC, Laptop, Server, dan Perlengkapan Kantor untuk instansi pemerintah & swasta via SiPLah & INAPROC.",
-    cta: { label: "Store Resmi", href: "/store" },
-    img: "https://picsum.photos/800/600?random=12",
-  },
-  {
-    title: "Web & App Development",
-    desc: "Pengembangan aplikasi & website perusahaan yang modern, responsif, aman, dan siap meningkatkan kredibilitas brand Anda.",
-    cta: { label: "Mulai Project", href: "#kontak" },
-    img: "https://picsum.photos/800/600?random=13",
-  },
-];
-
-export function HeroSlider() {
+export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const [current, setCurrent] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const count = slides.length;
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     if (timer.current) clearInterval(timer.current);
+    if (!count) return;
     timer.current = setInterval(() => {
-      setCurrent((c) => (c + 1) % SLIDES.length);
+      setCurrent((c) => (c + 1) % count);
     }, 5000);
-  };
+  }, [count]);
 
   useEffect(() => {
     resetTimer();
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
-  }, []);
+  }, [resetTimer]);
+
+  if (!count) return null;
 
   const go = (index: number) => {
     setCurrent(index);
@@ -67,9 +45,9 @@ export function HeroSlider() {
             </span>
 
             <div className="relative min-h-[260px] sm:min-h-[240px]">
-              {SLIDES.map((slide, i) => (
+              {slides.map((slide, i) => (
                 <div
-                  key={slide.title}
+                  key={slide.id}
                   className={cn(
                     "absolute inset-0 transition-opacity duration-500 space-y-4",
                     i === current ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -83,10 +61,10 @@ export function HeroSlider() {
                   </p>
                   <div className="pt-2">
                     <Link
-                      href={slide.cta.href}
+                      href={slide.ctaHref}
                       className="inline-flex items-center px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-600 transition-all shadow-md"
                     >
-                      {slide.cta.label}
+                      {slide.ctaLabel}
                     </Link>
                   </div>
                 </div>
@@ -94,9 +72,9 @@ export function HeroSlider() {
             </div>
 
             <div className="flex items-center gap-2 pt-4" role="tablist" aria-label="Slide Hero">
-              {SLIDES.map((slide, i) => (
+              {slides.map((slide, i) => (
                 <button
-                  key={slide.title}
+                  key={slide.id}
                   onClick={() => go(i)}
                   aria-label={`Slide ${i + 1}`}
                   aria-current={i === current}
@@ -111,28 +89,25 @@ export function HeroSlider() {
             </div>
           </div>
 
-          {/* Kanan: image slider + vignette */}
+          {/* Kanan: media slider (gambar / svg / animasi) + vignette */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-2xl overflow-hidden border border-line bg-card p-2 shadow-xl">
+            <div className="relative rounded-2xl overflow-hidden bg-card p-2 shadow-xl">
               <div className="hero-vignette relative h-[320px] sm:h-[420px] rounded-xl overflow-hidden">
-                {SLIDES.map((slide, i) => (
-                  <Image
-                  key={slide.img}
-                  src={slide.img}
-                  alt={slide.title}
-                  fill
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className={cn(
-                    "object-cover transition-opacity duration-500",
-                    i === current ? "opacity-100" : "opacity-0"
-                  )}
-                  priority={i === 0}
-                />
+                {slides.map((slide, i) => (
+                  <div
+                    key={slide.id}
+                    className={cn(
+                      "absolute inset-0 transition-opacity duration-500",
+                      i === current ? "opacity-100" : "opacity-0"
+                    )}
+                  >
+                    <HeroMediaVisual slide={slide} />
+                  </div>
                 ))}
               </div>
 
               <button
-                onClick={() => go((current - 1 + SLIDES.length) % SLIDES.length)}
+                onClick={() => go((current - 1 + count) % count)}
                 aria-label="Slide Sebelumnya"
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 dark:bg-slate-900/80 text-ink hover:bg-white transition-colors shadow-lg"
               >
@@ -141,7 +116,7 @@ export function HeroSlider() {
                 </svg>
               </button>
               <button
-                onClick={() => go((current + 1) % SLIDES.length)}
+                onClick={() => go((current + 1) % count)}
                 aria-label="Slide Selanjutnya"
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 dark:bg-slate-900/80 text-ink hover:bg-white transition-colors shadow-lg"
               >

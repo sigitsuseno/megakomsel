@@ -1,8 +1,17 @@
 import { Reveal } from "@/components/site/Reveal";
 import Image from "next/image";
 import { MILESTONES } from "@/lib/site";
+import { getSettingJson, SETTING_KEYS, type AboutSetting } from "@/lib/settings";
 
-export function AboutSection() {
+const ABOUT_DEFAULT: AboutSetting = {
+  headline: "Pengalaman Lebih dari 15 Tahun Membangun Infrastruktur Digital",
+  description:
+    "Kami memberikan Solusi IT untuk Perusahaan dan Perseorangan dengan pengalaman lebih dari 15 tahun. Komitmen kami adalah menyediakan perangkat keras berkualitas, sistem jaringan tangguh, dan purna jual yang sigap.",
+  milestones: MILESTONES,
+};
+
+export async function AboutSection() {
+  const about = await getSettingJson<AboutSetting>(SETTING_KEYS.about, ABOUT_DEFAULT);
   return (
     <section id="tentang" className="py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,12 +38,10 @@ export function AboutSection() {
               Profil Perusahaan
             </span>
             <h2 className="font-heading text-3xl sm:text-4xl font-bold text-ink">
-              Pengalaman Lebih dari 15 Tahun Membangun Infrastruktur Digital
+              {about.headline}
             </h2>
-            <p className="text-base text-ink/80 leading-relaxed">
-              Kami memberikan Solusi IT untuk Perusahaan dan Perseorangan dengan pengalaman lebih dari
-              15 tahun. Komitmen kami adalah menyediakan perangkat keras berkualitas, sistem jaringan
-              tangguh, dan purna jual yang sigap.
+            <p className="text-base text-ink/80 leading-relaxed whitespace-pre-line">
+              {about.description}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -67,7 +74,7 @@ export function AboutSection() {
                 Milestone Kami
               </h4>
               <div className="space-y-3 text-sm text-ink/75">
-                {MILESTONES.map((m) => (
+                {about.milestones.map((m) => (
                   <div key={m.year} className="flex items-center gap-3">
                     <span className="font-bold text-primary-600 dark:text-secondary">
                       {m.year}:

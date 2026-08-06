@@ -45,3 +45,6 @@ next-env.d.ts
 # database lokal (dev)
 /dev.db
 /dev.db-journal
+
+# file upload lokal
+/public/uploads

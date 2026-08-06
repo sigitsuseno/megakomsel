@@ -9,6 +9,7 @@ const LINKS = [
   { label: "Produk", href: "/dashboard/products", icon: "📦" },
   { label: "Pesanan", href: "/dashboard/orders", icon: "🧾" },
   { label: "Pesan Masuk", href: "/dashboard/messages", icon: "✉️" },
+  { label: "WEB UI", href: "/dashboard/web-ui", icon: "🌐" },
 ];
 
 export function Sidebar() {

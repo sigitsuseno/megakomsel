@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HERO_ANIM_PRESETS } from "@/lib/site";
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter").trim(),
@@ -45,3 +46,50 @@ export const orderSchema = z.object({
     )
     .min(1, "Keranjang kosong"),
 });
+
+export const marketplacesSchema = z
+  .array(
+    z.object({
+      name: z.string().min(1, "Nama wajib diisi").trim(),
+      url: z
+        .string()
+        .min(1, "URL wajib diisi")
+        .trim()
+        .refine((v) => /^https?:\/\/.+/.test(v), "URL harus dimulai dengan http(s)://"),
+      color: z
+        .string()
+        .trim()
+        .regex(/^[0-9a-fA-F]{6}$/, "Warna harus kode hex 6 digit (contoh: 6366F1)"),
+      image: z.string().trim().max(500).optional().or(z.literal("")),
+    })
+  )
+  .min(1, "Minimal satu link marketplace");
+
+export const aboutSchema = z.object({
+  headline: z.string().min(1, "Judul/profile wajib diisi").trim(),
+  description: z.string().min(1, "Deskripsi wajib diisi").trim(),
+  milestones: z
+    .array(
+      z.object({
+        year: z.string().min(1).trim(),
+        text: z.string().min(1).trim(),
+      })
+    )
+    .default([]),
+});
+
+export const heroSlideSchema = z.object({
+  id: z.string().min(1).max(64),
+  title: z.string().min(1, "Judul slide wajib diisi").trim().max(120),
+  desc: z.string().min(1, "Deskripsi slide wajib diisi").trim().max(600),
+  ctaLabel: z.string().min(1, "Label tombol wajib diisi").trim().max(60),
+  ctaHref: z.string().min(1, "Link tombol wajib diisi").trim().max(300),
+  mediaType: z.enum(["image", "svg", "anim"]),
+  image: z.string().trim().max(2000).optional().or(z.literal("")),
+  svg: z.string().trim().max(30000).optional().or(z.literal("")),
+  anim: z.enum(HERO_ANIM_PRESETS).default("waves"),
+});
+
+export const heroSchema = z
+  .array(heroSlideSchema)
+  .min(1, "Minimal satu slide hero");

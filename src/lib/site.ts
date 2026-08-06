@@ -20,6 +20,8 @@ export type MarketplaceItem = {
   name: string;
   url: string;
   color: string;
+  /** URL logo (upload lokal `/uploads/...` atau URL eksternal). Kosong = placeholder dari warna. */
+  image?: string;
 };
 
 export const MARKETPLACES: MarketplaceItem[] = [
@@ -30,6 +32,92 @@ export const MARKETPLACES: MarketplaceItem[] = [
   { name: "Tokopedia", url: "https://www.tokopedia.com/imatech", color: "42B549" },
   { name: "Shopee", url: "https://shopee.co.id/kitangs", color: "EE4D2D" },
   { name: "INAPROC", url: "https://katalog.inaproc.id/megakomsel", color: "08406F" },
+];
+
+/* ---------- Hero Section ---------- */
+
+export const HERO_ANIM_PRESETS = ["waves", "orbits", "terminal", "mesh", "grid"] as const;
+export type HeroAnimPreset = (typeof HERO_ANIM_PRESETS)[number];
+
+export type HeroSlide = {
+  id: string;
+  title: string;
+  desc: string;
+  ctaLabel: string;
+  ctaHref: string;
+  /** Jenis visual di sisi kanan slide. */
+  mediaType: "image" | "svg" | "anim";
+  /** URL gambar (upload lokal `/uploads/...` atau eksternal). Dipakai saat mediaType = "image". */
+  image: string;
+  /** Kode SVG inline (script & event handler dibersihkan saat render). Dipakai saat mediaType = "svg". */
+  svg: string;
+  /** Preset animasi bawaan. Dipakai saat mediaType = "anim". */
+  anim: HeroAnimPreset;
+};
+
+export const HERO_SLIDES: HeroSlide[] = [
+  {
+    id: "hero-1",
+    title: "Transformasi Digital Bisnis Anda",
+    desc: "Tingkatkan efisiensi & keamanan infrastruktur IT perusahaan Anda bersama layanan teknisi ahli profesional dari Megakomsel.",
+    ctaLabel: "Konsultasi Gratis",
+    ctaHref: "#kontak",
+    mediaType: "image",
+    image: "https://picsum.photos/800/600?random=10",
+    svg: "",
+    anim: "waves",
+  },
+  {
+    id: "hero-2",
+    title: "Promo CCTV Hingga 30%",
+    desc: "Sistem pengawasan keamanan IP CCTV terintegrasi 24/7, dapat dipantau langsung kapan saja melalui perangkat smartphone Anda.",
+    ctaLabel: "Lihat Paket CCTV",
+    ctaHref: "#layanan",
+    mediaType: "svg",
+    svg: `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="hero-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18BFFF" />
+      <stop offset="1" stop-color="#0B4F8A" />
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="200" r="150" fill="url(#hero-grad)" />
+  <g stroke="#FFFFFF" stroke-width="2" opacity="0.55">
+    <circle cx="200" cy="200" r="100" />
+    <circle cx="200" cy="200" r="55" />
+  </g>
+  <circle cx="200" cy="100" r="10" fill="#FFFFFF">
+    <animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="12s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="255" cy="200" r="8" fill="#18BFFF">
+    <animateTransform attributeName="transform" type="rotate" from="360 200 200" to="0 200 200" dur="8s" repeatCount="indefinite" />
+  </circle>
+</svg>`,
+    image: "",
+    anim: "waves",
+  },
+  {
+    id: "hero-3",
+    title: "Layanan Pengadaan Peralatan IT",
+    desc: "Mitra pengadaan resmi PC, Laptop, Server, dan Perlengkapan Kantor untuk instansi pemerintah & swasta via SiPLah & INAPROC.",
+    ctaLabel: "Store Resmi",
+    ctaHref: "/store",
+    mediaType: "anim",
+    image: "",
+    svg: "",
+    anim: "orbits",
+  },
+  {
+    id: "hero-4",
+    title: "Web & App Development",
+    desc: "Pengembangan aplikasi & website perusahaan yang modern, responsif, aman, dan siap meningkatkan kredibilitas brand Anda.",
+    ctaLabel: "Mulai Project",
+    ctaHref: "#kontak",
+    mediaType: "anim",
+    image: "",
+    svg: "",
+    anim: "mesh",
+  },
 ];
 
 export const NAV_LINKS = [

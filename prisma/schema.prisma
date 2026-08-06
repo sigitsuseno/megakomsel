@@ -82,3 +82,9 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
 }
+
+model SiteSetting {
+  key       String   @id
+  value     String // JSON string
+  updatedAt DateTime @updatedAt
+}

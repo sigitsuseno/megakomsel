@@ -1,15 +1,21 @@
 import Image from "next/image";
-import { MARKETPLACES } from "@/lib/site";
+import { MARKETPLACES, type MarketplaceItem } from "@/lib/site";
+import { getSettingJson, SETTING_KEYS } from "@/lib/settings";
 
 function MarketplaceCard({
   name,
   url,
   color,
+  image,
 }: {
   name: string;
   url: string;
   color: string;
+  image?: string;
 }) {
+  const src = image?.trim()
+    ? image
+    : `https://placehold.co/200x200/${color}/FFFFFF?text=${encodeURIComponent(name)}`;
   return (
     <a
       href={url}
@@ -20,10 +26,11 @@ function MarketplaceCard({
     >
       <div className="w-full h-3/4 flex items-center justify-center p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 group-hover:bg-primary/10 transition-colors">
         <Image
-          src={`https://placehold.co/200x200/${color}/FFFFFF?text=${encodeURIComponent(name)}`}
+          src={src}
           alt={name}
           width={200}
           height={200}
+          unoptimized
           className="max-h-full max-w-full object-contain"
         />
       </div>
@@ -34,8 +41,13 @@ function MarketplaceCard({
   );
 }
 
-export function MarketplaceMarquee() {
-  const items = [...MARKETPLACES, ...MARKETPLACES];
+export async function MarketplaceMarquee() {
+  const marketplaces = await getSettingJson<MarketplaceItem[]>(
+    SETTING_KEYS.marketplaces,
+    MARKETPLACES
+  );
+  const items = [...marketplaces, ...marketplaces];
+  if (!items.length) return null;
   return (
     <section
       id="marketplace"
