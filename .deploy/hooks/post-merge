@@ -1,0 +1,67 @@
+#!/bin/sh
+# post-merge hook — auto-deploy megakomsel (v3) di server XAMPP/Windows.
+#
+# Dipanggil otomatis oleh `git pull` / `git merge` yang berhasil (termasuk
+# fast-forward). Menjalankan: npm install -> prisma generate + migrate deploy
+# -> build Next.js -> restart PM2 (megakomsel-v3).
+#
+# Aktifkan sekali di server:
+#   git config core.hooksPath .deploy/hooks
+# (atau: npm run deploy:setup)
+#
+# Log aktivitas: .deploy/logs/deploy.log (tidak ikut ter-commit).
+
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 1
+
+mkdir -p .deploy/logs
+LOG=".deploy/logs/deploy.log"
+
+log() {
+  echo "[deploy] $(date '+%F %T') $*"
+  echo "[deploy] $(date '+%F %T') $*" >> "$LOG"
+}
+
+log "=== Post-merge: auto-deploy dimulai (dir: $ROOT) ==="
+
+# 1. Dependencies (idempotent — cepat jika tidak ada perubahan)
+log "npm install ..."
+npm install --no-audit --no-fund
+
+# 2. Prisma client + migrasi DB (produksi WAJIB "deploy", bukan "dev")
+if [ -d prisma ]; then
+  log "prisma generate ..."
+  npx prisma generate
+  log "prisma migrate deploy ..."
+  if ! npx prisma migrate deploy; then
+    log "WARNING: migrate deploy gagal — cek DATABASE_URL, lanjut ke build"
+  fi
+fi
+
+# 3. Build Next.js
+log "npm run build ..."
+if ! npm run build; then
+  log "ERROR: build gagal — proses lama tetap berjalan, cek detail dengan 'npm run build' manual"
+  exit 1
+fi
+
+# 4. Restart PM2 (app: megakomsel-v3)
+PM2_BIN="$(command -v pm2 2>/dev/null || true)"
+if [ -z "$PM2_BIN" ] && [ -f "C:/Users/Administrator/AppData/Roaming/npm/pm2.cmd" ]; then
+  PM2_BIN="C:/Users/Administrator/AppData/Roaming/npm/pm2.cmd"
+fi
+
+if [ -n "$PM2_BIN" ]; then
+  log "pm2 restart megakomsel-v3 ..."
+  if "$PM2_BIN" restart megakomsel-v3; then
+    log "pm2 restart OK"
+  else
+    log "WARNING: pm2 restart gagal — jalankan manual: pm2 restart megakomsel-v3"
+  fi
+else
+  log "WARNING: pm2 tidak ditemukan (PATH / path server) — jalankan manual: pm2 restart megakomsel-v3"
+fi
+
+log "=== Auto-deploy selesai ==="

@@ -48,3 +48,6 @@ next-env.d.ts
 
 # file upload lokal
 /public/uploads
+
+# log deploy/pm2 di server (jangan ikut ter-commit)
+/.deploy/logs/
