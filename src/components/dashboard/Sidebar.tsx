@@ -8,6 +8,7 @@ const LINKS = [
   { label: "Overview", href: "/dashboard", icon: "▦" },
   { label: "Produk", href: "/dashboard/products", icon: "📦" },
   { label: "Kategori", href: "/dashboard/categories", icon: "🗂️" },
+  { label: "Merek", href: "/dashboard/brands", icon: "🏷️" },
   { label: "Pesanan", href: "/dashboard/orders", icon: "🧾" },
   { label: "Pesan Masuk", href: "/dashboard/messages", icon: "✉️" },
   { label: "WEB UI", href: "/dashboard/web-ui", icon: "🌐" },

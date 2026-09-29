@@ -24,6 +24,7 @@ export const contactSchema = z.object({
 export const productSchema = z.object({
   name: z.string().min(3, "Nama produk minimal 3 karakter").trim(),
   categoryId: z.string().min(1, "Pilih kategori"),
+  brandId: z.string().trim().optional().or(z.literal("")),
   description: z.string().min(10, "Deskripsi minimal 10 karakter").trim(),
   price: z.coerce.number().int().positive("Harga harus angka positif"),
   stock: z.coerce.number().int().min(0).default(0),
@@ -34,6 +35,10 @@ export const productSchema = z.object({
 
 export const categorySchema = z.object({
   name: z.string().min(2, "Nama kategori minimal 2 karakter").max(100, "Nama kategori maksimal 100 karakter").trim(),
+});
+
+export const brandSchema = z.object({
+  name: z.string().min(2, "Nama merek minimal 2 karakter").max(100, "Nama merek maksimal 100 karakter").trim(),
 });
 
 export const orderSchema = z.object({

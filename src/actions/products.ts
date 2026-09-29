@@ -13,6 +13,7 @@ function parseProduct(formData: FormData) {
   return productSchema.safeParse({
     name: formData.get("name"),
     categoryId: formData.get("categoryId"),
+    brandId: formData.get("brandId") || "",
     description: formData.get("description"),
     price: formData.get("price"),
     stock: formData.get("stock") || "0",
@@ -44,6 +45,7 @@ export async function createProductAction(prevState: ProductState, formData: For
       featured: parsed.data.featured,
       active: parsed.data.active,
       categoryId: parsed.data.categoryId,
+      brandId: parsed.data.brandId || null,
     },
   });
 
@@ -69,6 +71,7 @@ export async function updateProductAction(id: string, prevState: ProductState, f
       featured: parsed.data.featured,
       active: parsed.data.active,
       categoryId: parsed.data.categoryId,
+      brandId: parsed.data.brandId || null,
     },
   });
 

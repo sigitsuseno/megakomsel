@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
-    include: { category: true },
+    include: { category: true, brand: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -32,6 +32,7 @@ export default async function ProductsPage() {
             <tr className="text-left text-xs uppercase tracking-wider text-ink/50 border-b border-line">
               <th className="py-3 px-4">Produk</th>
               <th className="py-3 px-4">Kategori</th>
+              <th className="py-3 px-4">Merek</th>
               <th className="py-3 px-4">Harga</th>
               <th className="py-3 px-4">Stok</th>
               <th className="py-3 px-4">Status</th>
@@ -54,6 +55,7 @@ export default async function ProductsPage() {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-ink/70">{p.category.name}</td>
+                <td className="py-3 px-4 text-ink/70">{p.brand?.name ?? "—"}</td>
                 <td className="py-3 px-4 font-semibold text-ink">{formatRupiah(p.price)}</td>
                 <td className="py-3 px-4 text-ink/70">{p.stock}</td>
                 <td className="py-3 px-4">

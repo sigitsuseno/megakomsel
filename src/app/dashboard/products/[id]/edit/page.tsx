@@ -11,9 +11,10 @@ export default async function EditProductPage({
   params,
 }: PageProps<"/dashboard/products/[id]/edit">) {
   const { id } = await params;
-  const [product, categories] = await Promise.all([
+  const [product, categories, brands] = await Promise.all([
     prisma.product.findUnique({ where: { id } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   if (!product) notFound();
@@ -30,6 +31,7 @@ export default async function EditProductPage({
         <ProductForm
           action={boundAction}
           categories={categories}
+          brands={brands}
           defaultValues={{
             name: product.name,
             description: product.description,
@@ -37,6 +39,7 @@ export default async function EditProductPage({
             stock: product.stock,
             image: product.image,
             categoryId: product.categoryId,
+            brandId: product.brandId ?? "",
             featured: product.featured,
             active: product.active,
           }}

@@ -56,11 +56,35 @@ async function main() {
     categoryMap[c.slug] = created.id;
   }
 
+  const brands = [
+    { name: "Lenovo", slug: "lenovo" },
+    { name: "HP", slug: "hp" },
+    { name: "Apple", slug: "apple" },
+    { name: "Megakomsel", slug: "megakomsel" },
+    { name: "Hikvision", slug: "hikvision" },
+    { name: "MikroTik", slug: "mikrotik" },
+    { name: "Cisco", slug: "cisco" },
+    { name: "Synology", slug: "synology" },
+    { name: "APC", slug: "apc" },
+    { name: "Dell", slug: "dell" },
+  ];
+
+  const brandMap: Record<string, string> = {};
+  for (const b of brands) {
+    const created = await prisma.brand.upsert({
+      where: { slug: b.slug },
+      update: {},
+      create: b,
+    });
+    brandMap[b.slug] = created.id;
+  }
+
   const products = [
     {
       name: "Lenovo ThinkPad X1 Carbon Gen 11",
       slug: "lenovo-thinkpad-x1-carbon-gen-11",
       categorySlug: "laptop",
+      brandSlug: "lenovo",
       description:
         "Laptop bisnis ultraportable 14\" dengan prosesor Intel Core i7, RAM 16GB, SSD 512GB NVMe, dan baterai tahan seharian. Garansi resmi 3 tahun.",
       price: 24500000,
@@ -71,6 +95,7 @@ async function main() {
       name: "HP EliteBook 840 G10",
       slug: "hp-elitebook-840-g10",
       categorySlug: "laptop",
+      brandSlug: "hp",
       description:
         "Laptop enterprise 14\" dengan Intel Core i5-1335U, RAM 16GB, SSD 512GB, layar FHD anti-glare, dan fitur keamanan HP Sure Start.",
       price: 18900000,
@@ -81,6 +106,7 @@ async function main() {
       name: "Apple MacBook Air M2 13\"",
       slug: "apple-macbook-air-m2-13",
       categorySlug: "laptop",
+      brandSlug: "apple",
       description:
         "MacBook Air dengan chip Apple M2, RAM 8GB, SSD 256GB, layar Liquid Retina, dan baterai hingga 18 jam.",
       price: 16999000,
@@ -91,6 +117,7 @@ async function main() {
       name: "PC Workstation Intel Core i9 + RTX 4070",
       slug: "pc-workstation-i9-rtx-4070",
       categorySlug: "pc-workstation",
+      brandSlug: "megakomsel",
       description:
         "Workstation untuk desain, editing video, dan rendering 3D. Intel Core i9-13900K, 64GB DDR5, RTX 4070 12GB, SSD 1TB NVMe.",
       price: 32500000,
@@ -101,6 +128,7 @@ async function main() {
       name: "PC Rakitan Office Intel i5",
       slug: "pc-rakitan-office-i5",
       categorySlug: "pc-workstation",
+      brandSlug: "megakomsel",
       description:
         "Paket PC kantor: Intel Core i5-12400, RAM 16GB, SSD 512GB, monitor 24\", keyboard + mouse. Siap pakai dengan OS berlisensi.",
       price: 7850000,
@@ -111,6 +139,7 @@ async function main() {
       name: "IP Camera Hikvision DS-2CD2143G2-I 4MP",
       slug: "hikvision-ds-2cd2143g2-i-4mp",
       categorySlug: "cctv-security",
+      brandSlug: "hikvision",
       description:
         "IP Camera dome 4MP dengan IR 30m, AcuSense human/vehicle detection, PoE, dan IP67. Cocok untuk indoor/outdoor.",
       price: 1850000,
@@ -121,6 +150,7 @@ async function main() {
       name: "NVR Hikvision DS-7616NI-I2 16 Channel",
       slug: "hikvision-ds-7616ni-i2",
       categorySlug: "cctv-security",
+      brandSlug: "hikvision",
       description:
         "Network Video Recorder 16 channel, support 4K, H.265+, dan akses remote via smartphone/PC.",
       price: 5400000,
@@ -131,6 +161,7 @@ async function main() {
       name: "RouterBoard MikroTik RB4011iGS+",
       slug: "mikrotik-rb4011igs",
       categorySlug: "jaringan",
+      brandSlug: "mikrotik",
       description:
         "Router enterprise 10-port (8x GbE, 2x SFP+ 10Gbps) dengan CPU quad-core. Ideal untuk kantor skala menengah.",
       price: 3450000,
@@ -141,6 +172,7 @@ async function main() {
       name: "Switch Cisco Catalyst CBS250-24T-4G",
       slug: "cisco-catalyst-cbs250-24t-4g",
       categorySlug: "jaringan",
+      brandSlug: "cisco",
       description:
         "Managed switch 24 port Gigabit + 4 port SFP, support VLAN, PoE optional, dan manajemen cloud Cisco.",
       price: 7250000,
@@ -151,6 +183,7 @@ async function main() {
       name: "NAS Synology DS923+ 4-Bay",
       slug: "synology-ds923-plus",
       categorySlug: "server-storage",
+      brandSlug: "synology",
       description:
         "NAS 4-bay untuk kantor: backup, file sharing, dan media server. Prosesor Ryzen R1600, upgradeable hingga 32GB RAM.",
       price: 9800000,
@@ -161,6 +194,7 @@ async function main() {
       name: "UPS APC Back-UPS BX950MI",
       slug: "apc-back-ups-bx950mi",
       categorySlug: "aksesoris",
+      brandSlug: "apc",
       description:
         "UPS 950VA untuk melindungi PC, server kecil, dan perangkat jaringan dari mati listrik mendadak.",
       price: 1450000,
@@ -171,6 +205,7 @@ async function main() {
       name: "Monitor Dell 27\" P2723DE QHD USB-C",
       slug: "dell-p2723de-qhd-usbc",
       categorySlug: "aksesoris",
+      brandSlug: "dell",
       description:
         "Monitor 27\" QHD 2560x1440 dengan USB-C 90W, hub USB, dan akurasi warna baik untuk produktivitas.",
       price: 5400000,
@@ -193,6 +228,7 @@ async function main() {
         active: true,
         image: `https://picsum.photos/seed/${p.slug}/600/450`,
         categoryId: categoryMap[p.categorySlug],
+        brandId: p.brandSlug ? brandMap[p.brandSlug] : null,
       },
     });
   }

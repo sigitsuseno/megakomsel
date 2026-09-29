@@ -14,7 +14,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true },
+    include: { category: true, brand: true },
   });
   if (!product) return { title: "Produk tidak ditemukan" };
   return {
@@ -29,14 +29,14 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true },
+    include: { category: true, brand: true },
   });
 
   if (!product || !product.active) notFound();
 
   const related = await prisma.product.findMany({
     where: { categoryId: product.categoryId, id: { not: product.id }, active: true },
-    include: { category: true },
+    include: { category: true, brand: true },
     take: 3,
   });
 
@@ -61,7 +61,10 @@ export default async function ProductDetailPage({
           </div>
 
           <div>
-            <Badge tone="primary">{product.category.name}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="primary">{product.category.name}</Badge>
+              {product.brand && <Badge tone="neutral">{product.brand.name}</Badge>}
+            </div>
             <h1 className="mt-3 font-heading text-3xl sm:text-4xl font-bold text-ink">
               {product.name}
             </h1>

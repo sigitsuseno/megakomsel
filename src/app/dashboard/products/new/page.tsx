@@ -7,7 +7,10 @@ import { ProductForm } from "@/components/dashboard/ProductForm";
 export const metadata: Metadata = { title: "Tambah Produk" };
 
 export default async function NewProductPage() {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const [categories, brands] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }),
+  ]);
 
   return (
     <div>
@@ -16,7 +19,7 @@ export default async function NewProductPage() {
       </Link>
       <h1 className="mt-2 font-heading text-2xl font-bold text-ink">Tambah Produk</h1>
       <div className="mt-6">
-        <ProductForm action={createProductAction} categories={categories} />
+        <ProductForm action={createProductAction} categories={categories} brands={brands} />
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export default async function StorePage({
         ...(selectedCategory ? { category: { slug: selectedCategory } } : {}),
         ...(query ? { name: { contains: query } } : {}),
       },
-      include: { category: true },
+      include: { category: true, brand: true },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     }),
   ]);

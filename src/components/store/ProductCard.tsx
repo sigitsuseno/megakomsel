@@ -12,6 +12,7 @@ export type ProductCardData = {
   image: string;
   stock: number;
   category: { name: string };
+  brand: { name: string } | null;
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -34,7 +35,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
       <div className="p-5 flex flex-col flex-grow">
         <span className="text-[10px] uppercase tracking-widest text-secondary font-bold">
-          {product.category.name}
+          {[product.brand?.name, product.category.name].filter(Boolean).join(" • ")}
         </span>
         <Link href={`/store/${product.slug}`} className="mt-1 font-heading font-bold text-ink hover:text-primary transition-colors line-clamp-2">
           {product.name}
