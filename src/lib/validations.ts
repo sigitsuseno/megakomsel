@@ -32,6 +32,10 @@ export const productSchema = z.object({
   active: z.coerce.boolean().default(true),
 });
 
+export const categorySchema = z.object({
+  name: z.string().min(2, "Nama kategori minimal 2 karakter").max(100, "Nama kategori maksimal 100 karakter").trim(),
+});
+
 export const orderSchema = z.object({
   customerName: z.string().min(2).trim(),
   customerEmail: z.email().trim(),
