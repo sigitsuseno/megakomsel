@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui";
 import { PurchaseBox } from "@/components/store/PurchaseBox";
 import { ProductCard } from "@/components/store/ProductCard";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, isPriceOnRequest } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -69,7 +69,7 @@ export default async function ProductDetailPage({
               {product.name}
             </h1>
             <p className="mt-3 font-heading text-2xl font-bold text-primary-600 dark:text-secondary">
-              {formatRupiah(product.price)}
+              {isPriceOnRequest(product.price) ? "Hubungi Kami" : formatRupiah(product.price)}
             </p>
 
             <div className="mt-3">

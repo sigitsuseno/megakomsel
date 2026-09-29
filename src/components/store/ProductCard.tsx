@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui";
 import { AddToCartButton } from "@/components/store/AddToCartButton";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, isPriceOnRequest } from "@/lib/utils";
 
 export type ProductCardData = {
   id: string;
@@ -41,13 +41,23 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.name}
         </Link>
         <p className="mt-2 font-bold text-primary-600 dark:text-secondary">
-          {formatRupiah(product.price)}
+          {isPriceOnRequest(product.price) ? "Hubungi Kami" : formatRupiah(product.price)}
         </p>
         <div className="mt-4 flex items-center justify-between gap-2">
           <span className="text-xs text-ink/60">
             {product.stock > 0 ? `Stok ${product.stock}` : "Pre-order"}
           </span>
-          <AddToCartButton product={product} />
+          {isPriceOnRequest(product.price) ? (
+            <Link
+              href="/#kontak"
+              className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition-all shadow-sm bg-secondary text-white hover:brightness-110"
+              aria-label={`Hubungi kami untuk harga ${product.name}`}
+            >
+              Hubungi Kami
+            </Link>
+          ) : (
+            <AddToCartButton product={product} />
+          )}
         </div>
       </div>
     </div>

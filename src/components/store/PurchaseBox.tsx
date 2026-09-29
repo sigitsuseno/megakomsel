@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AddToCartButton } from "@/components/store/AddToCartButton";
+import { isPriceOnRequest } from "@/lib/utils";
 
 type Props = {
   product: {
@@ -17,6 +19,22 @@ type Props = {
 export function PurchaseBox({ product }: Props) {
   const [qty, setQty] = useState(1);
   const max = Math.max(product.stock, 1);
+
+  if (isPriceOnRequest(product.price)) {
+    return (
+      <div className="mt-6">
+        <Link
+          href="/#kontak"
+          className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all shadow-sm bg-secondary text-white hover:brightness-110"
+        >
+          Hubungi Kami untuk Harga
+        </Link>
+        <p className="mt-2 text-xs text-ink/60">
+          Produk ini memakai harga khusus — silakan hubungi tim kami untuk penawaran terbaik.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-4 mt-6">

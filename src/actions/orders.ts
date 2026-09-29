@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser } from "@/lib/auth";
 import { orderSchema } from "@/lib/validations";
+import { isPriceOnRequest } from "@/lib/utils";
 
 export type OrderState =
   | { error?: string; success?: boolean; orderId?: string }
@@ -40,6 +41,9 @@ export async function createOrderAction(prevState: OrderState, formData: FormDat
         const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (!product || !product.active) {
           throw new Error(`Produk tidak ditemukan atau tidak aktif.`);
+        }
+        if (isPriceOnRequest(product.price)) {
+          throw new Error(`"${product.name}" memakai harga khusus — silakan hubungi kami.`);
         }
         if (product.stock < item.qty) {
           throw new Error(`Stok ${product.name} tidak mencukupi.`);

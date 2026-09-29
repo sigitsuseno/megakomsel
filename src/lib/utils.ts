@@ -19,6 +19,11 @@ export function slugify(text: string) {
     .replace(/-+/g, "-");
 }
 
+/** Harga 1 = "harga hubungi kami": jangan bisa dibeli, arahkan ke kontak. */
+export function isPriceOnRequest(price: number) {
+  return price <= 1;
+}
+
 export function formatDate(date: Date | string) {
   return new Intl.DateTimeFormat("id-ID", {
     dateStyle: "medium",
